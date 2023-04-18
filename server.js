@@ -9,6 +9,7 @@ app.set('view engine', 'handlebars');
 app.set('views', './views');
 
 require('./controllers/posts')(app);
+require('./controllers/comments')(app);
 require('./data/reddit-db');
 
 app.get('/', (req, res) => {

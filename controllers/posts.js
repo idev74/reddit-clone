@@ -16,7 +16,7 @@ module.exports = (app) => {
 
   app.post('/posts/new', async (req, res) => {
     const post = new Post(req.body);
-  
+    
     try {
       await post.save();
       res.redirect('/');

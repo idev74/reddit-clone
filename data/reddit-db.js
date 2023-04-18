@@ -7,13 +7,13 @@ const url = 'mongodb://localhost/reddit-db';
 mongoose.connect(
     url,
     {
-      useNewUrlParser: true, useUnifiedTopology: true,
+        useNewUrlParser: true, useUnifiedTopology: true,
     },
     (err) => {
-      assert.equal(null, err);
-      console.log("Connected successfully to database");
+        assert.equal(null, err);
+        console.log("Connected successfully to database");
     }
-  );
+);
 mongoose.connection.on('error', console.error.bind(console, 'MongoDB connection Error:'));
 mongoose.set('debug', true);
 
