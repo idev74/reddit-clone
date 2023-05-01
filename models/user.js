@@ -6,9 +6,7 @@ const userSchema = new Schema({
   password: { type: String, select: false },
 }, { timestamps: true });
 
-// Must use function expressions here! ES6 => functions do not bind this!
 userSchema.pre('save', function (next) {
-  // ENCRYPT PASSWORD
   const user = this;
   if (!user.isModified('password')) {
     return next();
@@ -21,7 +19,6 @@ userSchema.pre('save', function (next) {
   });
 });
 
-// Need to use function to enable this.password to work.
 userSchema.methods.comparePassword = function (password, done) {
   bcrypt.compare(password, this.password, (err, isMatch) => {
     done(err, isMatch);
