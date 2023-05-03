@@ -1,5 +1,5 @@
-const User = require('../models/user');
 const jwt = require('jsonwebtoken');
+const User = require('../models/user');
 
 module.exports = (app) => {
     app.get('/sign-up', (req, res) => res.render('sign-up'));
@@ -24,27 +24,25 @@ module.exports = (app) => {
 
     app.get('/login', (req, res) => res.render('login'));
 
-    app.post('/login', (req, res) => {
+    app.post('/login', async (req, res) => {
         const { username, password } = req.body;
-        User.findOne({ username }, 'username password')
-            .then((user) => {
-                if (!user) {
-                    return res.status(401).send({ message: 'Wrong Username or Password' });
+        try {
+            const user = await User.findOne({ username }, 'username password');
+            if (!user) {
+                return res.status(401).send({ message: 'Wrong Username or Password' });
+            }
+            user.comparePassword(password, (err, isMatch) => {
+                if (!isMatch) {
+                    return res.status(401).send({ message: 'Wrong Username or password' });
                 }
-                user.comparePassword(password, (err, isMatch) => {
-                    if (!isMatch) {
-                        return res.status(401).send({ message: 'Wrong Username or password' });
-                    }
-                    const token = jwt.sign({ _id: user._id, username: user.username }, process.env.SECRET, {
-                        expiresIn: '60 days',
-                    });
-                    res.cookie('nToken', token, { maxAge: 900000, httpOnly: true });
-                    return res.redirect('/');
+                const token = jwt.sign({ _id: user._id, username: user.username }, process.env.SECRET, {
+                    expiresIn: '60 days',
                 });
-            })
-            .catch((err) => {
-                console.log(err);
+                res.cookie('nToken', token, { maxAge: 900000, httpOnly: true });
+                return res.redirect('/');
             });
+        } catch (err) {
+            console.log(err);
+        }
     });
-
 };
