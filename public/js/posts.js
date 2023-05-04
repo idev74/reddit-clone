@@ -8,7 +8,6 @@ document.body.addEventListener('submit', e => {
       } else if (e.target.matches('.vote-down')) {
            e.preventDefault();
        voteDown(postId)
-  
       }
   })
   
