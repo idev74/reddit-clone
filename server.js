@@ -26,6 +26,6 @@ app.get('/posts/new', (req, res) => {
     res.render('posts-new');
 });
 
-app.listen(3001);
+app.listen(3003);
 
 module.exports = app;

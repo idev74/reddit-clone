@@ -1,10 +1,11 @@
 const Post = require('../models/post');
+const User = require('../models/user');
 
 module.exports = (app) => {
   app.get('/', async (req, res) => {
     try {
+      const posts = await Post.find({}).lean().populate('author');
       const currentUser = req.user;
-      const posts = await Post.find({}).lean();
       return res.render('posts-index', { posts, currentUser });
     } catch (err) {
       console.log(err.message);
@@ -35,14 +36,15 @@ module.exports = (app) => {
     }
   });
 
-  app.get('/posts/:id', (req, res) => {
+  app.get('/posts/:id', async (req, res) => {
     const currentUser = req.user;
   
-    Post.findById(req.params.id).lean().populate('comments').populate('author')
-      .then((post) => res.render('posts-show', { post, currentUser }))
-      .catch((err) => {
-        console.log(err.message);
-      });
+    try {
+      const post = await Post.findById(req.params.id).populate('comments').lean();
+      return res.render('posts-show', { post, currentUser });
+    } catch (err) {
+      console.log(err.message);
+    }
   });
   
   app.get('/n/:subreddit', (req, res) => {
