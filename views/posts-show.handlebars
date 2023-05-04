@@ -8,11 +8,10 @@
                 <textarea class='form-control' name="content" placeholder="Comment"></textarea>
                 <div class="text-right">
                     <button type="submit" class="btn btn-outline-primary mt-2">Post Comment</button>
-                    {{#each post.comments}}
-                    <p>{{this.content}}</p>
-                    <p class="font-weight-light text-muted">{{this.author.username}}</p>
-                    {{/each}}
                 </div>
+                    {{#each post.comments}}
+                    {{> comment comment=this postId=../post._id currentUser=../currentUser}}
+                    {{/each}}
             </form>
         </div>
     </div>

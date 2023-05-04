@@ -2,6 +2,7 @@ const cookieParser = require('cookie-parser');
 const express = require('express');
 const hbs = require('express-handlebars');
 const app = express();
+app.use(express.static('public'));
 const checkAuth = require('./middleware/checkAuth');
 
 app.engine('handlebars', hbs.engine({ defaultLayout: 'main', partialsDir: __dirname + '/views/partials'}));
@@ -15,16 +16,9 @@ app.set('views', './views');
 require('dotenv').config();
 require('./controllers/posts')(app);
 require('./controllers/comments')(app);
-require('./data/reddit-db');
 require('./controllers/auth.js')(app);
-
-app.get('/', (req, res) => {
-    res.render('home');
-});
-
-app.get('/posts/new', (req, res) => {
-    res.render('posts-new');
-});
+require('./controllers/replies.js')(app);
+require('./data/reddit-db');
 
 app.listen(3003);
 

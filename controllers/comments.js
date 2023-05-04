@@ -5,6 +5,10 @@ const User = require('../models/user');
 module.exports = (app) => {
   app.post('/posts/:postId/comments', async (req, res) => {
     try {
+      if (!req.user) {
+        return res.status(401).send({ message: 'You are not logged in!' });
+      }
+      
       const comment = new Comment(req.body);
       comment.author = req.user._id;
       await comment.save();
