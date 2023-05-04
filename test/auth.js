@@ -1,16 +1,17 @@
 const chai = require('chai');
 const chaiHttp = require('chai-http');
-const { describe, it } = require('mocha');
+const { describe, it, before, after } = require('mocha');
 const app = require('../server');
 const should = chai.should();
 chai.use(chaiHttp);
 const agent = chai.request.agent(app);
 const User = require('../models/user');
 
+after(function () {
+    agent.close();
+});
+
 describe('User', function () {
-    after(function () {
-        agent.close();
-    });
 
     it('should not be able to login if they have not registered', function (done) {
         agent.post('/login', { email: 'wrong@example.com', password: 'nope' }).end(function (err, res) {
