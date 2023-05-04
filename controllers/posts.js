@@ -17,22 +17,25 @@ module.exports = (app) => {
   });
 
   app.post('/posts/new', async (req, res) => {
-    if (req.user) {
-      const userId = req.user._id;
-      const post = new Post(req.body);
-      post.author = userId;
-  
-      try {
+    try {
+      if (req.user) {
+        const userId = req.user._id;
+        const post = new Post(req.body);
+        post.author = userId;
+        post.upVotes = [];
+        post.downVotes = [];
+        post.voteScore = 0;
+
         await post.save();
         const user = await User.findById(userId);
         user.posts.unshift(post);
         await user.save();
         return res.redirect(`/posts/${post._id}`);
-      } catch (err) {
-        console.log(err.message);
+      } else {
+        return res.status(401);
       }
-    } else {
-      return res.status(401); 
+    } catch (err) {
+      console.log(err.message);
     }
   });
 
@@ -45,7 +48,7 @@ module.exports = (app) => {
       console.log(err.message);
     }
   });
-  
+
   app.get('/n/:subreddit', async (req, res) => {
     try {
       const { user } = req;
@@ -64,6 +67,30 @@ module.exports = (app) => {
     } catch (err) {
       console.log(err.message);
     }
+  });
+
+  app.put('/posts/:id/vote-up', (req, res) => {
+    Post.findById(req.params.id).then(post => {
+      post.upVotes.push(req.user._id);
+      post.voteScore += 1;
+      post.save();
+
+      return res.status(200);
+    }).catch(err => {
+      console.log(err);
+    })
+  });
+
+  app.put('/posts/:id/vote-down', (req, res) => {
+    Post.findById(req.params.id).then(post => {
+      post.downVotes.push(req.user._id);
+      post.voteScore -= 1;
+      post.save();
+
+      return res.status(200);
+    }).catch(err => {
+      console.log(err);
+    });
   });
 
 };

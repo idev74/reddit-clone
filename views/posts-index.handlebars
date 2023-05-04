@@ -14,6 +14,15 @@
                 <div class="text-right">
                     <a href="/n/{{this.subreddit}}">n/{{this.subreddit}}</a>
                 </div>
+                <div class="d-flex align-items-center mt-3">
+                <form class="vote-up" data-id="{{this._id}}">
+                    <button class="btn btn-success" type="submit">Vote Up</button>
+                </form>
+                | Votes: {{this.voteScore}} |
+                <form class="vote-down" data-id="{{this._id}}">
+                    <button class="btn btn-danger" type="submit">Vote Down</button>
+                </form>
+                </div>
             </li>
             {{/each}}
         </ul>
