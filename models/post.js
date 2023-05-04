@@ -1,4 +1,5 @@
 const { Schema, model } = require('mongoose');
+const Populate = require('../util/autopopulate');
 
 const postSchema = new Schema({
   title: { type: String, required: true },
@@ -7,6 +8,13 @@ const postSchema = new Schema({
   comments: [{ type: Schema.Types.ObjectId, ref: 'Comment' }],
   subreddit: { type: String, required: true },
   author: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  upVotes : [{ type: Schema.Types.ObjectId, ref: 'User' }],
+  downVotes : [{ type: Schema.Types.ObjectId, ref: 'User' }],
+  voteScore : { type: Number },
 });
+
+postSchema
+  .pre('findOne', Populate('author'))
+  .pre('find', Populate('author'));
 
 module.exports = model('Post', postSchema);

@@ -17,54 +17,82 @@ module.exports = (app) => {
   });
 
   app.post('/posts/new', async (req, res) => {
-    if (req.user) {
-      const userId = req.user._id;
-      const post = new Post(req.body);
-      post.author = userId;
-  
-      try {
+    try {
+      if (req.user) {
+        const userId = req.user._id;
+        const post = new Post(req.body);
+        post.author = userId;
+        post.upVotes = [];
+        post.downVotes = [];
+        post.voteScore = 0;
+
         await post.save();
         const user = await User.findById(userId);
         user.posts.unshift(post);
         await user.save();
         return res.redirect(`/posts/${post._id}`);
-      } catch (err) {
-        console.log(err.message);
+      } else {
+        return res.status(401);
       }
-    } else {
-      return res.status(401); 
-    }
-  });
-
-  app.get('/posts/:id', async (req, res) => {
-    const currentUser = req.user;
-  
-    try {
-      const post = await Post.findById(req.params.id).populate({ path:'comments', populate: { path: 'author' } }).populate('author').lean();
-      return res.render('posts-show', { post, currentUser });
     } catch (err) {
       console.log(err.message);
     }
   });
+
+  app.get('/posts/:id', async (req, res) => {
+    try {
+      const currentUser = req.user;
+      const post = await Post.findById(req.params.id).populate('comments').lean();
+      res.render('posts-show', { post, currentUser });
+    } catch (err) {
+      console.log(err.message);
+    }
+  });
+
+  app.get('/n/:subreddit', async (req, res) => {
+    try {
+      const { user } = req;
+      const posts = await Post.find({ subreddit: req.params.subreddit }).lean();
+      res.render('posts-index', { posts, user });
+    } catch (err) {
+      console.log(err);
+    }
+  });
+
+  app.get('/', async (req, res) => {
+    try {
+      const currentUser = req.user;
+      const posts = await Post.find({});
+      res.render('posts-index', { posts, currentUser });
+    } catch (err) {
+      console.log(err.message);
+    }
+  });
+
+  app.put('/posts/:id/vote-up', async (req, res) => {
+    try {
+      const post = await Post.findById(req.params.id);
+      post.upVotes.push(req.user._id);
+      post.voteScore += 1;
+      await post.save();
+      return res.status(200);
+    } catch (err) {
+      console.log(err);
+    }
+  });
   
-  app.get('/n/:subreddit', (req, res) => {
-    const currentUser = req.user;
-    const { subreddit } = req.params;
-    Post.find({ subreddit }).lean().populate('author')
-      .then((posts) => res.render('posts-index', { posts, currentUser }))
-      .catch((err) => {
-        console.log(err);
-      });
-  });
 
-  app.get('/', (req, res) => {
-    const currentUser = req.user;
-
-    Post.find({})
-      .then((posts) => res.render('posts-index', { posts, currentUser }))
-      .catch((err) => {
-        console.log(err.message);
-      });
+  app.put('/posts/:id/vote-down', async (req, res) => {
+    try {
+      const post = await Post.findById(req.params.id);
+      post.downVotes.push(req.user._id);
+      post.voteScore -= 1;
+      await post.save();
+      return res.status(200);
+    } catch (err) {
+      console.log(err);
+    }
   });
+  
 
 };
